@@ -1,18 +1,5 @@
 use clap::Parser;
 
-#[derive(Debug)]
-pub enum UserStatus {
-    Active,
-    Inactive,
-    Banned(String),
-}
-
-pub struct User {
-    pub name: String,
-    pub email: Option<String>,
-    pub status: UserStatus,
-}
-
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
 pub struct Args {
@@ -27,4 +14,16 @@ pub struct Args {
 
     #[arg(long)]
     pub list: bool,
+
+    #[arg(long)]
+    pub add_note: Option<String>,
+
+    #[arg(long)]
+    pub show_notes: bool,
+
+    #[arg(long)]
+    pub clear_notes: bool,
+
+    #[arg(long)]
+    pub search_note: Option<String>,
 }

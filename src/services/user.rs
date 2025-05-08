@@ -1,5 +1,5 @@
 use crate::database::get_users;
-use crate::models::{User, UserStatus};
+use crate::models::user::{User, UserStatus};
 
 pub fn find_user_by_name(name: &str) -> Result<User, String> {
     get_users()
@@ -9,7 +9,9 @@ pub fn find_user_by_name(name: &str) -> Result<User, String> {
 }
 
 pub fn get_status_by_name(name: &str) -> Option<UserStatus> {
-    find_user_by_name(name).ok().map(|user| user.status)
+    find_user_by_name(name)
+        .ok()
+        .and_then(|user| Some(user.status))
 }
 
 pub fn get_email_by_name(name: &str) -> Option<String> {

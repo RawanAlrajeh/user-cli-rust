@@ -1,4 +1,4 @@
-use crate::models::{User, UserStatus};
+use crate::models::user::{User, UserStatus};
 
 pub fn get_users() -> Vec<User> {
     vec![
