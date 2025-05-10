@@ -1,4 +1,4 @@
-use crate::database::get_users;
+use crate::mock::database::get_users;
 use crate::models::user::{User, UserStatus};
 
 pub fn find_user_by_name(name: &str) -> Result<User, String> {
