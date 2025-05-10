@@ -92,6 +92,7 @@ pub fn add_note(title: &str, body: &str) {
         title: title.to_string(),
         body: body.to_string(),
         created_at: Local::now().to_string(),
+        updated_at: None,
     };
 
     notes.push(new_note);
@@ -147,4 +148,53 @@ pub fn delete_note_by_id(target_id: u32) -> bool {
     file.write_all(json.as_bytes())
         .expect("Failed to write file");
     true
+}
+
+pub fn edit_note_by_id(id: u32, new_title: Option<String>, new_body: Option<String>) -> bool {
+    let path = std::env::current_dir().unwrap().join("notes.json");
+
+    let mut notes: Vec<Note> =
+        if let Ok(mut file) = std::fs::OpenOptions::new().read(true).open(&path) {
+            let mut content = String::new();
+            use std::io::Read;
+            file.read_to_string(&mut content)
+                .expect("Failed to read file");
+
+            if content.trim().is_empty() {
+                return false;
+            }
+
+            serde_json::from_str(&content).unwrap_or_else(|_| vec![])
+        } else {
+            return false;
+        };
+
+    let mut updated = false;
+
+    for note in notes.iter_mut() {
+        if note.id == id {
+            if let Some(title) = new_title {
+                note.title = title;
+            }
+            if let Some(body) = new_body {
+                note.body = body;
+            }
+            note.updated_at = Some(Local::now().to_string());
+            updated = true;
+            break;
+        }
+    }
+
+    if updated {
+        let json = serde_json::to_string_pretty(&notes).expect("Failed to serialize");
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(&path)
+            .expect("Failed to open notes.json");
+        file.write_all(json.as_bytes())
+            .expect("Failed to write notes");
+    }
+
+    updated
 }

@@ -6,4 +6,5 @@ pub struct Note {
     pub title: String,
     pub body: String,
     pub created_at: String,
+    pub updated_at: Option<String>,
 }

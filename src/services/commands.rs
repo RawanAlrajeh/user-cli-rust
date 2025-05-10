@@ -2,7 +2,8 @@ use crate::models::args::Args;
 use crate::services::notes::add_note;
 use crate::services::{
     notes::{
-        clear_notes, delete_note_by_id, read_notes, read_notes_from_json, search_note, write_note,
+        clear_notes, delete_note_by_id, edit_note_by_id, read_notes, read_notes_from_json,
+        search_note, write_note,
     },
     user::{find_user_by_name, get_all_users, get_email_by_name, get_status_by_name},
 };
@@ -54,9 +55,9 @@ pub fn handle_note_commands(args: &Args) {
         }
     }
 
-    //  add note with title and body with json file
-
     // ✅ JSON mode: title + body
+
+    //  add note with title and body with json file
     if let (Some(title), Some(body)) = (&args.note_title, &args.note_body) {
         add_note(title, body);
         println!("📝 Structured note added!");
@@ -72,6 +73,9 @@ pub fn handle_note_commands(args: &Args) {
                 println!("🆔 ID: {}", note.id);
                 println!("📌 {} - {}", note.title, note.created_at);
                 println!("📝 {}", note.body);
+                if let Some(updated) = &note.updated_at {
+                    println!("🔄 Last updated: {}", updated);
+                }
                 println!("-------------------------------------");
             }
         }
@@ -97,6 +101,14 @@ pub fn handle_note_commands(args: &Args) {
             println!("🗑️ Note deleted!");
         } else {
             println!("❌ Note not found");
+        }
+    }
+    if let Some(id) = args.edit_note {
+        let updated = edit_note_by_id(id, args.new_title.clone(), args.new_body.clone());
+        if updated {
+            println!("✏️ Note with ID {} updated!", id);
+        } else {
+            println!("⚠️ No note found with ID {}", id);
         }
     }
 }

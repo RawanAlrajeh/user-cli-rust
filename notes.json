@@ -1,8 +1,9 @@
 [
   {
     "id": 1,
-    "title": "Test2",
-    "body": "Trying out note ID 2 ",
-    "created_at": "2025-05-10 04:27:59.484691 +03:00"
+    "title": "New Title",
+    "body": "New body",
+    "created_at": "2025-05-10 04:27:59.484691 +03:00",
+    "updated_at": "2025-05-10 22:20:54.353872 +03:00"
   }
 ]

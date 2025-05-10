@@ -41,4 +41,13 @@ pub struct Args {
 
     #[arg(long)]
     pub delete_note: Option<u32>,
+
+    #[arg(long)]
+    pub edit_note: Option<u32>, // ID to edit
+
+    #[arg(long)]
+    pub new_title: Option<String>,
+
+    #[arg(long)]
+    pub new_body: Option<String>,
 }

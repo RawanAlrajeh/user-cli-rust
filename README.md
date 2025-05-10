@@ -39,6 +39,7 @@ cargo run -- --clear-notes
 cargo run -- --note-title "Meeting" --note-body "Call with the team at 5pm"
 cargo run -- --show-structured-notes
 cargo run -- --delete-note 1
+cargo run -- --edit-note 1 --new-title "New Title" --new-body "New Body"
 ```
 
 ## 📚 Notes
