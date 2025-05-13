@@ -2,8 +2,8 @@ use crate::models::args::Args;
 use crate::services::notes::add_note;
 use crate::services::{
     notes::{
-        clear_notes, delete_note_by_id, edit_note_by_id, read_notes, read_notes_from_json,
-        search_note, write_note,
+        clear_notes, delete_note_by_id, edit_note_by_id, export_notes_to_csv, export_notes_to_md,
+        export_notes_to_pdf, read_notes, read_notes_from_json, search_note, write_note,
     },
     user::{find_user_by_name, get_all_users, get_email_by_name, get_status_by_name},
 };
@@ -59,13 +59,14 @@ pub fn handle_note_commands(args: &Args) {
 
     //  add note with title and body with json file
     if let (Some(title), Some(body)) = (&args.note_title, &args.note_body) {
-        add_note(title, body);
+        add_note(title, body, args.tags.clone());
         println!("📝 Structured note added!");
         return;
     }
 
     if args.show_structured_notes {
         let notes = read_notes_from_json();
+
         if notes.is_empty() {
             println!("📭 No structured notes found.");
         } else {
@@ -75,6 +76,9 @@ pub fn handle_note_commands(args: &Args) {
                 println!("📝 {}", note.body);
                 if let Some(updated) = &note.updated_at {
                     println!("🔄 Last updated: {}", updated);
+                }
+                if !note.tags.is_empty() {
+                    println!("🏷️ Tags: {}", note.tags.join(", "));
                 }
                 println!("-------------------------------------");
             }
@@ -109,6 +113,98 @@ pub fn handle_note_commands(args: &Args) {
             println!("✏️ Note with ID {} updated!", id);
         } else {
             println!("⚠️ No note found with ID {}", id);
+        }
+    }
+
+    if let Some(tag) = &args.filter_by_tag {
+        let notes = read_notes_from_json();
+        let filtered: Vec<_> = notes
+            .into_iter()
+            .filter(|note| {
+                note.tags
+                    .iter()
+                    .any(|t| t.to_lowercase() == tag.to_lowercase())
+            })
+            .collect();
+
+        if filtered.is_empty() {
+            println!("📭 No notes found with tag '{}'.", tag);
+        } else {
+            println!("🔎 Notes tagged with '{}':", tag);
+            for note in filtered {
+                println!("🆔 ID: {}", note.id);
+                println!("📌 {} - {}", note.title, note.created_at);
+                println!("📝 {}", note.body);
+
+                if let Some(updated) = &note.updated_at {
+                    println!("🔄 Last updated: {}", updated);
+                }
+
+                if !note.tags.is_empty() {
+                    println!("🏷️ Tags: {}", note.tags.join(", "));
+                }
+
+                println!("-------------------------------------");
+            }
+        }
+    }
+
+    if args.export_md {
+        if export_notes_to_md() {
+            println!("📤 Notes exported to notes.md!");
+        } else {
+            println!("❌ Failed to export notes.");
+        }
+    }
+
+    if args.export_csv {
+        if export_notes_to_csv() {
+            println!("📤 Notes exported to notes.csv!");
+        } else {
+            println!("❌ Failed to export notes.");
+        }
+    }
+
+    if args.export_pdf {
+        if export_notes_to_pdf() {
+            println!("📄 Notes exported to notes.pdf!");
+        } else {
+            println!("❌ Failed to export PDF.");
+        }
+    }
+
+    if args.export_pdf {
+        let success = export_notes_to_pdf();
+        if success {
+            println!("✅ PDF exported to notes.pdf");
+
+            if args.open_pdf {
+                #[cfg(target_os = "macos")]
+                {
+                    std::process::Command::new("open")
+                        .arg("notes.pdf")
+                        .spawn()
+                        .expect("❌ Failed to open PDF file");
+                }
+
+                #[cfg(target_os = "windows")]
+                {
+                    std::process::Command::new("cmd")
+                        .args(["/C", "start", "notes.pdf"])
+                        .spawn()
+                        .expect("❌ Failed to open PDF file");
+                }
+
+                #[cfg(target_os = "linux")]
+                {
+                    std::process::Command::new("xdg-open")
+                        .arg("notes.pdf")
+                        .spawn()
+                        .expect("❌ Failed to open PDF file");
+                }
+            }
+        } else {
+            println!("❌ Failed to export PDF");
         }
     }
 }

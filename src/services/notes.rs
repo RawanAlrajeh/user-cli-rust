@@ -1,4 +1,5 @@
 use chrono::Local;
+use genpdf::Element;
 use std::fs::{read_to_string, File, OpenOptions};
 use std::io::Read;
 use std::io::{BufRead, BufReader, Write};
@@ -60,7 +61,7 @@ pub fn search_note(query: &str) -> Result<String, String> {
     }
 }
 
-pub fn add_note(title: &str, body: &str) {
+pub fn add_note(title: &str, body: &str, tags: Option<Vec<String>>) {
     let path = std::env::current_dir().unwrap().join("notes.json");
 
     // read notes from json file
@@ -93,6 +94,7 @@ pub fn add_note(title: &str, body: &str) {
         body: body.to_string(),
         created_at: Local::now().to_string(),
         updated_at: None,
+        tags: tags.unwrap_or_default(),
     };
 
     notes.push(new_note);
@@ -197,4 +199,133 @@ pub fn edit_note_by_id(id: u32, new_title: Option<String>, new_body: Option<Stri
     }
 
     updated
+}
+
+pub fn export_notes_to_md() -> bool {
+    let notes = read_notes_from_json();
+
+    let mut content = String::new();
+
+    for note in notes {
+        content.push_str(&format!("## 🆔 ID: {}\n", note.id));
+        content.push_str(&format!("### 📌 Title: {}\n", note.title));
+        content.push_str(&format!("- 🕒 Created: {}\n", note.created_at));
+        if let Some(updated) = note.updated_at {
+            content.push_str(&format!("- 🔄 Updated: {}\n", updated));
+        }
+        if !note.tags.is_empty() {
+            content.push_str(&format!("- 🏷️ Tags: {}\n", note.tags.join(", ")));
+        }
+        content.push_str(&format!("\n**Note:**\n{}\n", note.body));
+        content.push_str("\n---\n\n");
+    }
+
+    let mut file = match std::fs::File::create("notes.md") {
+        Ok(f) => f,
+        Err(_) => return false,
+    };
+
+    use std::io::Write;
+    file.write_all(content.as_bytes()).is_ok()
+}
+
+pub fn export_notes_to_csv() -> bool {
+    let notes = read_notes_from_json();
+
+    let path = std::env::current_dir().unwrap().join("notes.csv");
+
+    let mut file = match std::fs::File::create(&path) {
+        Ok(f) => f,
+        Err(_) => return false,
+    };
+
+    use std::io::Write;
+
+    // add BOM (UTF-8)
+    let bom = b"\xEF\xBB\xBF";
+    if file.write_all(bom).is_err() {
+        return false;
+    }
+
+    // write the header
+    if writeln!(file, "id,title,body,created_at,updated_at,tags").is_err() {
+        return false;
+    }
+
+    for note in notes {
+        let updated = note.updated_at.unwrap_or_default();
+        let tags = note.tags.join(", ");
+        // write the line, with the escape if there is a comma
+        let safe_title = note.title.replace(",", ";");
+        let safe_body = note.body.replace(",", ";");
+
+        let row = format!(
+            "{},{},{},{},{},{}\n",
+            note.id, safe_title, safe_body, note.created_at, updated, tags
+        );
+
+        if file.write_all(row.as_bytes()).is_err() {
+            return false;
+        }
+    }
+
+    true
+}
+
+pub fn export_notes_to_pdf() -> bool {
+    let notes = read_notes_from_json();
+
+    // ✅ حمل الخط من ملف ttf
+    let font_family = genpdf::fonts::from_files("assets", "Amiri", None)
+    .expect("❌ Failed to load font family from assets/");
+
+    let mut doc = genpdf::Document::new(font_family);
+
+    for note in notes {
+        let mut section = genpdf::elements::LinearLayout::vertical();
+
+        section.push(
+            genpdf::elements::Paragraph::new(format!("🆔 ID: {}", note.id))
+                .styled(genpdf::style::Style::new().bold()),
+        );
+        section.push(genpdf::elements::Paragraph::new(format!(
+            "📌 {}",
+            note.title
+        )));
+        section.push(genpdf::elements::Paragraph::new(format!(
+            "📝 {}",
+            note.body
+        )));
+        section.push(genpdf::elements::Paragraph::new(format!(
+            "🕒 Created: {}",
+            note.created_at
+        )));
+
+        if let Some(updated) = &note.updated_at {
+            section.push(genpdf::elements::Paragraph::new(format!(
+                "🔄 Updated: {}",
+                updated
+            )));
+        }
+
+        if !note.tags.is_empty() {
+            section.push(genpdf::elements::Paragraph::new(format!(
+                "🏷️ Tags: {}",
+                note.tags.join(", ")
+            )));
+        }
+
+        section.push(genpdf::elements::Break::new(1));
+        section.push(genpdf::elements::Break::new(1));
+
+        doc.push(section);
+    }
+
+    match doc.render_to_file("notes.pdf") {
+        Ok(_) => true,
+        Err(e) => {
+            println!("❌ PDF generation error: {}", e);
+            false
+        }
+    }
 }

@@ -7,4 +7,5 @@ pub struct Note {
     pub body: String,
     pub created_at: String,
     pub updated_at: Option<String>,
+    pub tags: Vec<String>,
 }

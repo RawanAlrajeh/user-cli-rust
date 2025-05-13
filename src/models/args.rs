@@ -50,4 +50,22 @@ pub struct Args {
 
     #[arg(long)]
     pub new_body: Option<String>,
+
+    #[arg(long, value_delimiter = ',')]
+    pub tags: Option<Vec<String>>,
+
+    #[arg(long)]
+    pub filter_by_tag: Option<String>,
+
+    #[arg(long)]
+    pub export_md: bool,
+
+    #[arg(long)]
+    pub export_csv: bool,
+
+    #[arg(long, action = clap::ArgAction::SetTrue)]
+    pub export_pdf: bool,
+
+    #[arg(long, action = clap::ArgAction::SetTrue)]
+    pub open_pdf: bool,
 }
