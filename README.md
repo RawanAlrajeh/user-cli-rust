@@ -1,25 +1,42 @@
-# 🦀 Rust User CLI
+<h1 align="center">🦀 Rust Notes CLI</h1>
+<p align="center">
+A powerful command-line tool to manage notes with tags, search, and export to PDF/CSV/Markdown – built with Rust 💪
+</p>
 
-A simple command-line app built in Rust for practicing core concepts like:
+<p align="center">
+    <img src="https://img.shields.io/badge/made%20with-Rust-orange?style=for-the-badge" alt="Made with Rust" />
+    <img src="https://img.shields.io/badge/cli-app-blueviolet?style=for-the-badge" alt="CLI App" />
+    <img src="https://img.shields.io/badge/pdf-csv-md-green?style=for-the-badge" alt="Exports" />
+</p>
 
-- `struct` and `enum`
-- `Option` and `Result` handling
-- Pattern matching
-- Modular code structure (`models`, `database`, `services`)
-- Command-line argument parsing with [`clap`](https://docs.rs/clap/latest/clap/)
-- File operations with [`std::fs`](https://doc.rust-lang.org/std/fs/index.html)
-- JSON serialization with [`serde`](https://docs.rs/serde/latest/serde/)
-- 📄 Export to PDF / CSV / Markdown
-- 🕒 Created and updated timestamps
-- 📂 Auto-open PDF after export
+---
+
+## 📌 About the Project
+
+This is a Rust CLI application that lets you manage personal notes efficiently.
+
+### ✨ Features
+
+- 🏷️ Add notes with **tags**
+- 🔍 Search by **content or tag**
+- 🕒 Tracks both **created** and **updated** timestamps
+- 📄 Export to **PDF**, **CSV**, and **Markdown**
+- 📂 Option to **open the PDF file automatically** after export
+
+### 🧠 Built to Practice Rust Concepts
+
+- `struct`, `enum`, and pattern matching
+- CLI parsing with [`clap`](https://docs.rs/clap)
+- File handling with [`std::fs`]
+- JSON serialization with [`serde`]
+- Date/time with [`chrono`]
+- Modular codebase (`services`, `models`, etc.)
+
+---
 
 ## 📦 How to Run
 
 Make sure you have Rust installed, then run:
-
-```bash
-cargo run -- [OPTIONS]
-```
 
 ### 👤 User Commands
 
@@ -55,6 +72,25 @@ cargo run -- --export-pdf --open-pdf
 cargo run -- --export-csv
 cargo run -- --export-md
 ```
+
+### 🚀 Ready to Run
+
+```bash
+cargo build
+cargo run -- --help
+```
+
+### 📁 Project Structure
+
+<pre>
+src/
+├── models/
+│   └── note.rs
+├── services/
+│   └── notes.rs
+├── main.rs
+├── args.rs
+</pre>
 
 ## 📚 Notes
 
