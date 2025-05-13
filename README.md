@@ -83,13 +83,22 @@ cargo run -- --help
 ### 📁 Project Structure
 
 <pre>
-src/
-├── models/
-│   └── note.rs
-├── services/
-│   └── notes.rs
-├── main.rs
-├── args.rs
+└── src/
+    ├── main.rs
+    ├── args.rs
+    ├── mock/
+    │   ├── database.rs
+    │   └── mod.rs
+    ├── models/
+    │   ├── args.rs
+    │   ├── mod.rs
+    │   ├── note.rs
+    │   └── user.rs
+    └── services/
+        ├── commands.rs
+        ├── mod.rs
+        ├── notes.rs
+        └── user.rs
 </pre>
 
 ## 📚 Notes
